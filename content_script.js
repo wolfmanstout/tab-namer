@@ -1,27 +1,40 @@
 function updateTitle(tabIndex) {
-  if (tabIndex != document.lastTabIndex && document.originalTitle) {
-    setTitle(document.originalTitle, tabIndex);
-  } else if (document.title != document.lastTitle) {
-    document.originalTitle = document.title;
+  if (typeof tabIndex === "undefined") {
+    return;
+  }
+  if (typeof window.lastTitle === "undefined" || document.title != window.lastTitle) {
+    // Title has never been adjusted or has been changed by something other than this script.
+    window.originalTitle = document.title;
     setTitle(document.title, tabIndex);
+  } else if (tabIndex != window.lastTabIndex) {
+    // Tab index has changed; reuse last title.
+    setTitle(window.originalTitle, tabIndex);
   }
 }
 
 function setTitle(title, tabIndex) {
   var prefix = tabIndex < 8 ? (tabIndex + 1) + ' ' : '';
   document.title = prefix + title + ' <' + location.host + '>';
-  document.lastTitle = document.title;
-  document.lastTabIndex = tabIndex;
+  window.lastTitle = document.title;
+  window.lastTabIndex = tabIndex;
 }
 
 function registerListener() {
-  if (document.titleObserver) {
-    return;
-  }
-  document.titleObserver = new MutationObserver(function(mutations) {
-    updateTitle(document.lastTabIndex);
+  // Listen for changes from background.js.
+  chrome.runtime.onMessage.addListener(
+    function(request, sender, sendResponse) {
+      updateTitle(request.tabIndex);
+    });
+
+  // Listen for changes to the title originating from within the page.
+  var titleObserver = new MutationObserver(function(mutations) {
+    updateTitle(window.lastTabIndex);
   });
   
   var config = { attributes: true, childList: true, characterData: true };
-  document.titleObserver.observe(document.getElementsByTagName('title')[0], config);
+  titleObserver.observe(document.getElementsByTagName('title')[0], config);
 }
+
+window.addEventListener("load", function(event) {
+  registerListener();
+});
