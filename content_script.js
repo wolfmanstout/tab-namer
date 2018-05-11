@@ -35,6 +35,6 @@ function registerListener() {
   titleObserver.observe(document.getElementsByTagName('title')[0], config);
 }
 
-window.addEventListener("load", function(event) {
+document.addEventListener("DOMContentLoaded", function(event) {
   registerListener();
 });
