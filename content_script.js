@@ -20,7 +20,7 @@ function setTitle(title, tabIndex) {
 }
 
 function registerListener() {
-  // Listen for changes from background.js.
+  // Listen for changes from service_worker.js.
   chrome.runtime.onMessage.addListener(
     function(request, sender, sendResponse) {
       updateTitle(request.tabIndex);

@@ -1,5 +1,5 @@
 function updateTabName(tab) {
-  chrome.tabs.sendMessage(tab.id, {"tabIndex": tab.index});
+  chrome.tabs.sendMessage(tab.id, {"tabIndex": tab.index}).catch(error => {});
 }
 
 function updateAllTabs() {
@@ -32,5 +32,5 @@ chrome.tabs.onAttached.addListener(function() {
 });
 
 chrome.tabs.onUpdated.addListener(function(tabId, changeInfo, tab) {
-  updateTabName(tab);
+  updateTabName(tab)
 });
